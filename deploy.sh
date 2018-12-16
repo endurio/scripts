@@ -48,6 +48,6 @@ if [[ $OPT_UPDATE ]] || [ ! -x "$(command -v ndrseeder)" ]; then
     cd -
 fi
 
-if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEED_IP stat /usr/local/bin/ndrseeder \> /dev/null 2\>\&1; then
+if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEED_IP command -v ndrseeder \> /dev/null 2\>\&1; then
     $SCP "$(command -v ndrseeder)" $SSH_USER@$SEED_IP:/usr/local/bin/
 fi
