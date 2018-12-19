@@ -30,10 +30,21 @@ SCP="scp -oStrictHostKeyChecking=no -o BatchMode=yes"
 PSCP="parallel-scp -OStrictHostKeyChecking=no -OBatchMode=yes"
 SSH_COPY_ID="ssh-copy-id -f"
 
+# MINER
+MINER_HOST=miner.endur.io
+
 # DNS SEEDER
-SEED_IP=149.28.131.66
+SEEDER_HOST=seed.endur.io
+SEEDER_NS=ns37.domaincontrol.com
+SEEDER_IP=seed.endur.io
 SEEDER_REPO=https://github.com/endurio/ndrseeder.git
 SEEDER_PATH=$GOPATH/src/github.com/endurio/ndrseeder
+SEEDER_PORT=5354
+
+if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEEDER_IP stat iptables.sh \> /dev/null 2\>\&1; then
+    $SCP iptables.sh $SSH_USER@$SEEDER_IP:./
+fi
+$SSH $SSH_USER@$SEEDER_IP bash iptables.sh 22tcp $SEEDER_PORT
 
 if [[ $OPT_UPDATE ]] || [ ! -x "$(command -v ndrseeder)" ]; then
     if [ ! -d "$SEEDER_PATH" ]; then
@@ -48,14 +59,13 @@ if [[ $OPT_UPDATE ]] || [ ! -x "$(command -v ndrseeder)" ]; then
     cd -
 fi
 
-if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEED_IP command -v ndrseeder \> /dev/null 2\>\&1; then
+if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEEDER_IP command -v ndrseeder \> /dev/null 2\>\&1; then
     if [ -x "$(command -v strip)" ]; then
         strip -s "$(command -v ndrseeder)"
     fi
-    $SCP "$(command -v ndrseeder)" $SSH_USER@$SEED_IP:/usr/local/bin/
+    $SCP "$(command -v ndrseeder)" $SSH_USER@$SEEDER_IP:/usr/local/bin/
 fi
 
-if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEED_IP stat iptables.sh \> /dev/null 2\>\&1; then
-    $SCP iptables.sh $SSH_USER@$SEED_IP:./
-fi
-$SSH $SSH_USER@$SEED_IP bash iptables.sh 22tcp 8333
+#$SSH $SSH_USER@$SEEDER_IP killall -q --signal SIGINT ndrseeder
+$SSH $SSH_USER@$SEEDER_IP killall -q ndrseeder
+$SSH $SSH_USER@$SEEDER_IP "nohup ndrseeder -H $SEEDER_HOST -n $SEEDER_NS -s $MINER_HOST >ndrseeder.log 2>&1 &"
