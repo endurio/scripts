@@ -25,11 +25,13 @@ iptables -P INPUT DROP
 
 # save them
 #iptables-save | sudo tee /etc/sysconfig/iptables
+if ! command -v netfilter-persistent >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get -yq install iptables-persistent
+fi
 netfilter-persistent save
 iptables -S
 
 # restart the service
 #service iptables restart
 netfilter-persistent reload
-
-
