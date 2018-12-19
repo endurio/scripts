@@ -49,5 +49,8 @@ if [[ $OPT_UPDATE ]] || [ ! -x "$(command -v ndrseeder)" ]; then
 fi
 
 if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEED_IP command -v ndrseeder \> /dev/null 2\>\&1; then
+    if [ -x "$(command -v strip)" ]; then
+        strip -s "$(command -v ndrseeder)"
+    fi
     $SCP "$(command -v ndrseeder)" $SSH_USER@$SEED_IP:/usr/local/bin/
 fi
