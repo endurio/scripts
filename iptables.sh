@@ -12,12 +12,20 @@ iptables -A INPUT -p tcp ! --syn -m state --state NEW -j DROP
 iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
 iptables -A INPUT -i lo -j ACCEPT
 
-# BTCD
-iptables -A INPUT -p tcp -m tcp --dport 8333 -j ACCEPT
-iptables -A INPUT -p udp -m udp --dport 8333 -j ACCEPT
-
-# SSH
-iptables -A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
+for VAR in "$@"
+do
+    if [ "${VAR: -3}" = "tcp" ]; then
+        PORT=${VAR::-3}
+        iptables -A INPUT -p tcp -m tcp --dport $PORT -j ACCEPT
+    elif [ "${VAR: -3}" = "udp" ]; then
+        PORT=${VAR::-3}
+        iptables -A INPUT -p udp -m udp --dport $PORT -j ACCEPT
+    else
+        PORT=$VAR
+        iptables -A INPUT -p tcp -m tcp --dport $PORT -j ACCEPT
+        iptables -A INPUT -p udp -m udp --dport $PORT -j ACCEPT
+    fi
+done
 
 iptables -I INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -P OUTPUT ACCEPT

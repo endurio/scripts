@@ -54,3 +54,6 @@ if [[ $OPT_UPDATE ]] || ! $SSH $SSH_USER@$SEED_IP command -v ndrseeder \> /dev/n
     fi
     $SCP "$(command -v ndrseeder)" $SSH_USER@$SEED_IP:/usr/local/bin/
 fi
+
+$SCP iptables.sh $SSH_USER@$SEED_IP:./
+$SSH $SSH_USER@$SEED_IP bash iptables.sh 22tcp 8333
