@@ -81,7 +81,7 @@ fi
 if [[ $daemon -ne 0 ]]; then
 	START $NDRD
 	sleep 1
-	$CTL generate 16
+	$CTL generate 18
 
 	if [[ $first -ne 0 ]]; then
 		START $NDRW
@@ -93,6 +93,9 @@ if [[ $daemon -ne 0 ]]; then
 		sleep 5
 		$CTLW walletpassphrase password 0
 		$CTLW importprivkey $MINING_SKEY
+
+		$CTLW getbalance
+		$CTLW listunspent
 
 		ACC=imported
 		$CTLW sendfrom $ACC $WALLET_ADDR 13
@@ -130,6 +133,9 @@ fi
 # idle waiting for Ctrl-D from user
 echo "Ctrl-D to finish and stop all daemons.."
 $(</dev/stdin)
+
+# tail the log
+#grc -c grc.conf tail -F {$NDRD_DIR,$NDRW_DIR,$NDRW_TMP_DIR}/logs/simnet/ndr*.log
 
 # stop running daemons
 if [[ $wallet -ne 0 ]]; then
